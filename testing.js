@@ -37,13 +37,13 @@ app.get('/signup', (req, res) =>{
   let passHashGenerator = signUpPass.md.sha256.create();
   let saltedPassword;
   let passHash;
-  let query = "INSERT INTO userlogin VALUES(?, ?)";
+  let querySignUp = "INSERT INTO userlogin VALUES(?, ?)";
   let inserts = [];
 
   saltGenerator.update(username); //generate a salt from the second half of their username
 
   saltedPassword = password + saltGenerator.digest().toHex(); //add the salt onto the password.
-  console.log(saltedPassword);
+  //console.log(saltedPassword);
 
   passHashGenerator.update(saltedPassword);
 
@@ -52,15 +52,23 @@ app.get('/signup', (req, res) =>{
   inserts[0] = username;
   inserts[1] = passHash;
 
-  query = mysql.format(query, inserts);
-  console.log(query);
+  querySignUp = mysql.format(querySignUp, inserts);
+  //console.log(query);
 
-  //var con = "SELECT * FROM ?? WHERE ?? = ?";
-//  var inserts = ['users', 'id', "username'; DROP TABLES; --"];
- // con = mysql.format(con, inserts);
-  //console.log(con);
 
-  res.end("signup page");
+  con.query(querySignUp, (err, result) => {
+    if(err){
+      console.log("ERROR!")
+
+      if(err.errno === 1062){
+        res.send("duplicate");
+      }
+      return res.send(err);
+    }else{
+      
+      return res.send("inserted")
+    }
+  })
 
   
 })
