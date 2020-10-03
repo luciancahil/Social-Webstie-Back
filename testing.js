@@ -37,23 +37,32 @@ app.get('/signup', (req, res) =>{
   let passHashGenerator = signUpPass.md.sha256.create();
   let saltedPassword;
   let passHash;
+  let query = "INSERT INTO userlogin VALUES(?, ?)";
+  let inserts = [];
 
-  saltGenerator.update(username.substr(username.length/2));
+  saltGenerator.update(username); //generate a salt from the second half of their username
 
-  saltedPassword = password + saltGenerator.digest().toHex();
+  saltedPassword = password + saltGenerator.digest().toHex(); //add the salt onto the password.
   console.log(saltedPassword);
 
   passHashGenerator.update(saltedPassword);
 
-  passHash = passHashGenerator.digest().toHex();
-  console.log(passHash);
+  passHash = passHashGenerator.digest().toHex();        //generate a hash of the salted password
+
+  inserts[0] = username;
+  inserts[1] = passHash;
+
+  query = mysql.format(query, inserts);
+  console.log(query);
+
+  //var con = "SELECT * FROM ?? WHERE ?? = ?";
+//  var inserts = ['users', 'id', "username'; DROP TABLES; --"];
+ // con = mysql.format(con, inserts);
+  //console.log(con);
 
   res.end("signup page");
 
-  var con = "SELECT * FROM ?? WHERE ?? = ?";
-  var inserts = ['users', 'id', "username'; DROP TABLES; --"];
-  con = mysql.format(con, inserts);
-  console.log(con);
+  
 })
 
 app.listen(PORT, () => {
