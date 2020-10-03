@@ -10,12 +10,22 @@ const mysql = require('mysql');
 const Key = require('./key');
 const signUPSalt = require('node-forge');
 const signUpPass = require('node-forge');
+const data = require("./Login.json");
+
  
 //var key = 'asdfl;sdjlkfjlk;asdlkj';
 //var plaintext = 'my plaintext message';
  
 //var encrypted = aes256.encrypt(key, plaintext);
 //var decrypted = aes256.decrypt(key, encrypted);
+
+var con = mysql.createConnection({
+  host: data.host,
+  user: data.user,
+  password: data.password,
+  database: data.database
+});
+
 
 app.get('/', (req, res) =>{
     res.end("got to /login for login info")
@@ -39,6 +49,11 @@ app.get('/signup', (req, res) =>{
   console.log(passHash);
 
   res.end("signup page");
+
+  var con = "SELECT * FROM ?? WHERE ?? = ?";
+  var inserts = ['users', 'id', "username'; DROP TABLES; --"];
+  con = mysql.format(con, inserts);
+  console.log(con);
 })
 
 app.listen(PORT, () => {
