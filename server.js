@@ -8,8 +8,8 @@ const app = express();
 const {PORT = 4000} = process.env
 const mysql = require('mysql');
 const Key = require('./key');
-const signUPSalt = require('node-forge');
-const signUpPass = require('node-forge');
+const salt = require('node-forge');
+const pass = require('node-forge');
 const data = require("./Login.json");
 
  
@@ -33,8 +33,8 @@ app.get('/', (req, res) =>{
 
 app.get('/signup', (req, res) =>{
   const{username, password} = req.query;
-  let saltGenerator = signUPSalt.md.sha256.create();
-  let passHashGenerator = signUpPass.md.sha256.create();
+  let saltGenerator = salt.md.sha256.create();
+  let passHashGenerator = pass.md.sha256.create();
   let saltedPassword;
   let passHash;
   let querySignUp = "INSERT INTO userlogin VALUES(?, ?)";
@@ -61,12 +61,12 @@ app.get('/signup', (req, res) =>{
       console.log("ERROR!")
 
       if(err.errno === 1062){
-        res.send("duplicate");
+        res.end("duplicate");
       }
-      return res.send(err);
+      return res.end(err);
     }else{
       
-      return res.send("inserted")
+      return res.end("inserted")
     }
   })
 
@@ -75,8 +75,8 @@ app.get('/signup', (req, res) =>{
 
 app.get('/login', (req, res) =>{
   const{username, password} = req.query;
-  let saltGenerator = signUpSalt.md.sha256.create();
-  let passHashGenerator = signUpPass.md.sha256.create();
+  let saltGenerator = salt.md.sha256.create();
+  let passHashGenerator = pass.md.sha256.create();
   let saltedPassword;
   let passHash;
   let queryLogin = "SELECT passHash FROM userlogin WHERE username = ?"
@@ -98,25 +98,23 @@ app.get('/login', (req, res) =>{
   con.query(queryLogin, (err, result) => {
     if(err){
       console.log("ERROR!");
-      return res.send(err);
+      return res.end(err);
     }else{
       
       //the username does not exist
       if(result.length === 0){
-        res.send("unfound");
+        res.end("unfound");
+      }else{
+        storedHash = result[0].passHash;
+
+        if(passHash === storedHash){  // password is correct
+          res.end("granted");
+        }else{                  //password is incorrect
+          res.end("incorrect");
+        }
+
+        return res.end("returned")
       }
-      //console.log(result);
-
-      storedHash = result[0].passHash;
-      console.log(passHash === storedHash);
-
-      if(passHash === storedHash){  // password is correct
-        res.send("granted");
-      }else{                  //password is incorrect
-        res.send("incorrect");
-      }
-
-      return res.send("returned")
     }
   })
 
