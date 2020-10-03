@@ -73,6 +73,56 @@ app.get('/signup', (req, res) =>{
   
 })
 
+app.get('/login', (req, res) =>{
+  const{username, password} = req.query;
+  let saltGenerator = signUpSalt.md.sha256.create();
+  let passHashGenerator = signUpPass.md.sha256.create();
+  let saltedPassword;
+  let passHash;
+  let queryLogin = "SELECT passHash FROM userlogin WHERE username = ?"
+  let inserts = [];
+  let storedHash;     //password hash in the database
+
+  saltGenerator.update(username); //generate a salt from their username
+
+  saltedPassword = password + saltGenerator.digest().toHex(); //add the salt onto the password.
+
+  passHashGenerator.update(saltedPassword);
+
+  passHash = passHashGenerator.digest().toHex();        //generate a hash of the salted password
+
+  inserts[0] = username;
+
+  queryLogin = mysql.format(queryLogin, inserts);
+
+  con.query(queryLogin, (err, result) => {
+    if(err){
+      console.log("ERROR!");
+      return res.send(err);
+    }else{
+      
+      //the username does not exist
+      if(result.length === 0){
+        res.send("unfound");
+      }
+      //console.log(result);
+
+      storedHash = result[0].passHash;
+      console.log(passHash === storedHash);
+
+      if(passHash === storedHash){  // password is correct
+        res.send("granted");
+      }else{                  //password is incorrect
+        res.send("incorrect");
+      }
+
+      return res.send("returned")
+    }
+  })
+
+  
+})
+
 app.listen(PORT, () => {
   console.log('Server Loaded on port ${PORT}');
 })
