@@ -75,7 +75,7 @@ app.get('/signup', (req, res) =>{
 
 app.get('/login', (req, res) =>{
   const{username, password} = req.query;
-  let saltGenerator = signUPSalt.md.sha256.create();
+  let saltGenerator = signUpSalt.md.sha256.create();
   let passHashGenerator = signUpPass.md.sha256.create();
   let saltedPassword;
   let passHash;
@@ -86,7 +86,6 @@ app.get('/login', (req, res) =>{
   saltGenerator.update(username); //generate a salt from their username
 
   saltedPassword = password + saltGenerator.digest().toHex(); //add the salt onto the password.
-  //console.log(saltedPassword);
 
   passHashGenerator.update(saltedPassword);
 
@@ -95,16 +94,27 @@ app.get('/login', (req, res) =>{
   inserts[0] = username;
 
   queryLogin = mysql.format(queryLogin, inserts);
-  //console.log(query);
-
 
   con.query(queryLogin, (err, result) => {
     if(err){
       console.log("ERROR!");
       return res.send(err);
     }else{
+      
+      //the username does not exist
+      if(result.length === 0){
+        res.send("unfound");
+      }
+      //console.log(result);
+
       storedHash = result[0].passHash;
-      console.log(storedHash);
+      console.log(passHash === storedHash);
+
+      if(passHash === storedHash){  // password is correct
+        res.send("granted");
+      }else{                  //password is incorrect
+        res.send("incorrect");
+      }
 
       return res.send("returned")
     }
