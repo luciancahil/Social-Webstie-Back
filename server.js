@@ -189,6 +189,10 @@ app.get('/getQnA',(req, res) =>{
   let getQuery = "SELECT question, encryptedAnswer FROM userinfo WHERE username = ?";
   let inserts = [username];
   getQuery = mysql.format(getQuery, inserts);
+  let question;
+  let decryptedAnswer;
+  let resultLen;
+  let responseMap = new Map();
 
   con.query(getQuery, (err, result) => {
     if(err){
@@ -196,10 +200,17 @@ app.get('/getQnA',(req, res) =>{
       console.log(error);
       return res.end(error);
     }else{
+
+      //encryptedAnswer
       
-      //the username does not exist
+      resultLen = result.length;
       console.log(result);
-      res.end("success!");
+      for(let i = 0; i < resultLen; i++){
+        decryptedAnswer = aes256.decrypt(getKey, result[i].encryptedAnswer);
+        responseMap[result[i].question] = decryptedAnswer;
+      }
+      console.log(responseMap);
+      res.json(responseMap);
       }
     })
   
