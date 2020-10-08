@@ -81,15 +81,15 @@ app.get('/signup', (req, res) =>{
 
 //cleans up the query string to get 
 function cleanQuery(string){
-  let purged = string.replaceAll("+", " ");
-  purged = purged.replaceAll("%20", " ");
-  purged = purged.replaceAll("%26", "&");
-  purged = purged.replaceAll("%22", "\"");
-  purged = purged.replaceAll("%3E", ">");
-  purged = purged.replaceAll("%3C", "<");
-  purged = purged.replaceAll("%22", "\"");
-  purged = purged.replaceAll("%27", "'");
-  purged = purged.replaceAll("%lf", "%");
+  let purged = replaceAll(string, "+", " ");
+  purged = replaceAll(purged, "%20", " ");
+  purged = replaceAll(purged, "%26", "&");
+  purged = replaceAll(purged, "%22", "\"");
+  purged = replaceAll(purged, "%3E", ">");
+  purged = replaceAll(purged, "%3C", "<");
+  purged = replaceAll(purged, "%22", "\"");
+  purged = replaceAll(purged, "%27", "'");
+  purged = replaceAll(purged, "%lf", "%");
   
 
   return purged;
@@ -98,13 +98,12 @@ function cleanQuery(string){
 //replace all implementation
 function replaceAll(string, oldChar, newChar){
   let replaced = string.replace(oldChar, newChar);
-  console.log(replaced);
 
   while(replaced != replaced.replace(oldChar, newChar)){
     replaced = replaced.replace(oldChar, newChar)
   }
 
-  console.log(replaced);
+  return replaced;
 }
 
 app.get('/login', (req, res) =>{
@@ -159,11 +158,13 @@ app.get('/login', (req, res) =>{
 
 app.get('/addQnA',(req, res) =>{
   const{username, password, question, answer} = req.query;
-  //replaceAll("live and let live", "l", "r");
-  //question = cleanQuery(question);
-  //answer = cleanQuery(answer);
+  cleanQuestion = cleanQuery(question);
+  cleanAnswer = cleanQuery(answer);
   let addKey = Key.getKey(username, password);
-  //console.log(addKey);
+  let encryptedAnswer = aes256.decrypt(addKey, cleanAnswer);
+
+
+  console.log(encryptedAnswer);
 
   res.end('working');
 })
