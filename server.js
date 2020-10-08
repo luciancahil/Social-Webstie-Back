@@ -12,6 +12,7 @@ const salt = require('node-forge');
 const pass = require('node-forge');
 const data = require("./Login.json");
 
+app.use(cors());
  
 //var key = 'asdfl;sdjlkfjlk;asdlkj';
 //var plaintext = 'my plaintext message';
@@ -33,17 +34,20 @@ app.get('/', (req, res) =>{
 
 app.get('/signup', (req, res) =>{
   const{username, password} = req.query;
-  let saltGenerator = salt.md.sha256.create();
-  let passHashGenerator = pass.md.sha256.create();
-  let saltedPassword;
-  let passHash;
-  let querySignUp = "INSERT INTO userlogin VALUES(?, ?)";
+  let saltGenerator = salt.md.sha256.create();                  // The forge that will generate the salt
+  let passHashGenerator = pass.md.sha256.create();              // The forge that will generate the hash from the password
+  let saltedPassword;                                           // The password with the salt appended 
+  let passHash;                                                 // The salted hash of the password
+  let querySignUp = "INSERT INTO userlogin VALUES(?, ?, ?)";    // The query for the signup, with values username, passhash, and usernum
   let inserts = [];
+  let userNum;                                                  // generates a number by treating each character like a base
 
   saltGenerator.update(username); //generate a salt from the second half of their username
 
   saltedPassword = password + saltGenerator.digest().toHex(); //add the salt onto the password.
-  //console.log(saltedPassword);
+  
+  userNum = parseInt(saltGenerator.digest().toHex(), 16) % 1000000000;  // generates the userNum from the hash of the username
+
 
   passHashGenerator.update(saltedPassword);
 
@@ -51,6 +55,7 @@ app.get('/signup', (req, res) =>{
 
   inserts[0] = username;
   inserts[1] = passHash;
+  inserts[2] = userNum;
 
   querySignUp = mysql.format(querySignUp, inserts);
   //console.log(query);
@@ -59,6 +64,7 @@ app.get('/signup', (req, res) =>{
   con.query(querySignUp, (err, result) => {
     if(err){
       console.log("ERROR!")
+      console.log(err);
 
       if(err.errno === 1062){
         res.end("duplicate");
@@ -97,8 +103,9 @@ app.get('/login', (req, res) =>{
 
   con.query(queryLogin, (err, result) => {
     if(err){
-      console.log("ERROR!");
-      return res.end(err);
+      console.log(queryLogin);
+      console.log(err);
+      return res.end("err");
     }else{
       
       //the username does not exist
