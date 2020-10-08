@@ -161,10 +161,12 @@ app.get('/addQnA',(req, res) =>{
   cleanQuestion = cleanQuery(question);
   cleanAnswer = cleanQuery(answer);
   let addKey = Key.getKey(username, password);
-  let encryptedAnswer = aes256.decrypt(addKey, cleanAnswer);
+  let encryptedAnswer = aes256.encrypt(addKey, cleanAnswer);
+  let addQnAQuery = "Insert INTO userinfo VALUES(?,?,?)"
+  let inserts = [username, question, encryptedAnswer];
+  addQnAQuery = mysql.format(addQnAQuery, inserts);
 
-
-  console.log(encryptedAnswer);
+  console.log(addQnAQuery);
 
   res.end('working');
 })
