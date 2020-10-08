@@ -58,7 +58,6 @@ app.get('/signup', (req, res) =>{
   inserts[2] = userNum;
 
   querySignUp = mysql.format(querySignUp, inserts);
-  //console.log(query);
 
 
   con.query(querySignUp, (err, result) => {
@@ -78,6 +77,35 @@ app.get('/signup', (req, res) =>{
 
   
 })
+
+
+//cleans up the query string to get 
+function cleanQuery(string){
+  let purged = string.replaceAll("+", " ");
+  purged = purged.replaceAll("%20", " ");
+  purged = purged.replaceAll("%26", "&");
+  purged = purged.replaceAll("%22", "\"");
+  purged = purged.replaceAll("%3E", ">");
+  purged = purged.replaceAll("%3C", "<");
+  purged = purged.replaceAll("%22", "\"");
+  purged = purged.replaceAll("%27", "'");
+  purged = purged.replaceAll("%lf", "%");
+  
+
+  return purged;
+}
+
+//replace all implementation
+function replaceAll(string, oldChar, newChar){
+  let replaced = string.replace(oldChar, newChar);
+  console.log(replaced);
+
+  while(replaced != replaced.replace(oldChar, newChar)){
+    replaced = replaced.replace(oldChar, newChar)
+  }
+
+  console.log(replaced);
+}
 
 app.get('/login', (req, res) =>{
   const{username, password} = req.query;
@@ -126,6 +154,18 @@ app.get('/login', (req, res) =>{
   })
 
   
+})
+
+
+app.get('/addQnA',(req, res) =>{
+  const{username, password, question, answer} = req.query;
+  //replaceAll("live and let live", "l", "r");
+  //question = cleanQuery(question);
+  //answer = cleanQuery(answer);
+  let addKey = Key.getKey(username, password);
+  //console.log(addKey);
+
+  res.end('working');
 })
 
 app.listen(PORT, () => {

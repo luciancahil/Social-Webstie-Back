@@ -21,7 +21,6 @@ module.exports = {    /*
         largeKeyGenerator.update(entry);
         largeKey = largeKeyGenerator.digest().toHex();
 
-        console.log(largeKey);
 
         startingNumber = parseInt(largeKey[1], 16);
         thirdNumber = parseInt(largeKey[2], 16);
@@ -31,8 +30,6 @@ module.exports = {    /*
         }
 
         key = largeKey.substring(startingNumber, startingNumber + 32);
-        console.log(startingNumber);
-        console.log(key);
 
         return key;
     }
