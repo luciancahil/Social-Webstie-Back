@@ -183,6 +183,78 @@ app.get('/addQnA',(req, res) =>{
   })
 })
 
+app.get('/getQnA',(req, res) =>{
+  const{username, password} = req.query;
+  let getKey = Key.getKey(username, password);
+  let getQuery = "SELECT question, encryptedAnswer FROM userinfo WHERE username = ?";
+  let inserts = [username];
+  getQuery = mysql.format(getQuery, inserts);
+
+  con.query(getQuery, (err, result) => {
+    if(err){
+      let error = "" + err;
+      console.log(error);
+      return res.end(error);
+    }else{
+      
+      //the username does not exist
+      console.log(result);
+      res.end("success!");
+      }
+    })
+  
+
+  /*
+con.query(getQuery, (err, result) => {
+    if(err){
+      let error = "" + err;
+      console.log(error);
+      return res.end(error);
+    }else{
+      
+      //the username does not exist
+      if(result.length === 0){
+        res.end("unfound");
+      }else{
+        storedHash = result[0].passHash;
+
+        if(passHash === storedHash){  // password is correct
+          res.end("granted");
+        }else{                  //password is incorrect
+          res.end("incorrect");
+        }
+
+        return res.end("returned")
+      }
+    }
+  })
+
+  */
+  /*
+  const{username, password, question, answer} = req.query;
+  cleanQuestion = cleanQuery(question);
+  cleanAnswer = cleanQuery(answer);
+  let addKey = Key.getKey(username, password);
+  let encryptedAnswer = aes256.encrypt(addKey, cleanAnswer);
+  let addQnAQuery = "Insert INTO userinfo VALUES(?,?,?) ON DUPLICATE KEY UPDATE encryptedAnswer = ?"
+  let inserts = [username, question, encryptedAnswer, encryptedAnswer];
+  addQnAQuery = mysql.format(addQnAQuery, inserts);
+
+  con.query(addQnAQuery, (err, result) => {
+    if(err){
+      let error = "" + err;
+      console.log("ERROR!")
+      console.log(error);
+
+
+      return res.end(error);
+    }else{
+      
+      return res.end("inserted")
+    }
+  })*/
+})
+
 app.listen(PORT, () => {
   console.log('Server Loaded on port ${PORT}');
 })
