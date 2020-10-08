@@ -189,83 +189,31 @@ app.get('/getQnA',(req, res) =>{
   let getQuery = "SELECT question, encryptedAnswer FROM userinfo WHERE username = ?";
   let inserts = [username];
   getQuery = mysql.format(getQuery, inserts);
-  let question;
   let decryptedAnswer;
-  let resultLen;
-  let responseMap = new Map();
+  let resultLen;                //length of the result object
+  let responseMap = new Map();  // maps answers to questions
 
   con.query(getQuery, (err, result) => {
     if(err){
       let error = "" + err;
       console.log(error);
       return res.end(error);
-    }else{
-
-      //encryptedAnswer
-      
+    }else{  
       resultLen = result.length;
-      console.log(result);
+
+      //maps each decrypted answer to its questions
       for(let i = 0; i < resultLen; i++){
         decryptedAnswer = aes256.decrypt(getKey, result[i].encryptedAnswer);
         responseMap[result[i].question] = decryptedAnswer;
       }
-      console.log(responseMap);
+
       res.json(responseMap);
       }
     })
-  
 
-  /*
-con.query(getQuery, (err, result) => {
-    if(err){
-      let error = "" + err;
-      console.log(error);
-      return res.end(error);
-    }else{
-      
-      //the username does not exist
-      if(result.length === 0){
-        res.end("unfound");
-      }else{
-        storedHash = result[0].passHash;
-
-        if(passHash === storedHash){  // password is correct
-          res.end("granted");
-        }else{                  //password is incorrect
-          res.end("incorrect");
-        }
-
-        return res.end("returned")
-      }
-    }
-  })
-
-  */
-  /*
-  const{username, password, question, answer} = req.query;
-  cleanQuestion = cleanQuery(question);
-  cleanAnswer = cleanQuery(answer);
-  let addKey = Key.getKey(username, password);
-  let encryptedAnswer = aes256.encrypt(addKey, cleanAnswer);
-  let addQnAQuery = "Insert INTO userinfo VALUES(?,?,?) ON DUPLICATE KEY UPDATE encryptedAnswer = ?"
-  let inserts = [username, question, encryptedAnswer, encryptedAnswer];
-  addQnAQuery = mysql.format(addQnAQuery, inserts);
-
-  con.query(addQnAQuery, (err, result) => {
-    if(err){
-      let error = "" + err;
-      console.log("ERROR!")
-      console.log(error);
-
-
-      return res.end(error);
-    }else{
-      
-      return res.end("inserted")
-    }
-  })*/
+    
 })
-
+//getQnA?username=royhe62&password=no
 app.listen(PORT, () => {
   console.log('Server Loaded on port ${PORT}');
 })
