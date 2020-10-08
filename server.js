@@ -168,9 +168,19 @@ app.get('/addQnA',(req, res) =>{
   let inserts = [username, question, encryptedAnswer, encryptedAnswer];
   addQnAQuery = mysql.format(addQnAQuery, inserts);
 
-  console.log(addQnAQuery);
+  con.query(addQnAQuery, (err, result) => {
+    if(err){
+      let error = "" + err;
+      console.log("ERROR!")
+      console.log(error);
 
-  res.end('working');
+
+      return res.end(error);
+    }else{
+      
+      return res.end("inserted")
+    }
+  })
 })
 
 app.listen(PORT, () => {
