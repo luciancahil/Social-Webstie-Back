@@ -28,6 +28,33 @@ var con = mysql.createConnection({
 });
 
 
+//cleans up the query string to get 
+function cleanQuery(string){
+  let purged = replaceAll(string, "+", " ");
+  purged = replaceAll(purged, "%20", " ");
+  purged = replaceAll(purged, "%26", "&");
+  purged = replaceAll(purged, "%22", "\"");
+  purged = replaceAll(purged, "%3E", ">");
+  purged = replaceAll(purged, "%3C", "<");
+  purged = replaceAll(purged, "%22", "\"");
+  purged = replaceAll(purged, "%27", "'");
+  purged = replaceAll(purged, "%lf", "%");
+  
+
+  return purged;
+}
+
+//replace all implementation
+function replaceAll(string, oldChar, newChar){
+  let replaced = string.replace(oldChar, newChar);
+
+  while(replaced != replaced.replace(oldChar, newChar)){
+    replaced = replaced.replace(oldChar, newChar)
+  }
+
+  return replaced;
+}
+
 app.get('/', (req, res) =>{
     res.end("got to /login for login info")
   })
@@ -79,32 +106,7 @@ app.get('/signup', (req, res) =>{
 })
 
 
-//cleans up the query string to get 
-function cleanQuery(string){
-  let purged = replaceAll(string, "+", " ");
-  purged = replaceAll(purged, "%20", " ");
-  purged = replaceAll(purged, "%26", "&");
-  purged = replaceAll(purged, "%22", "\"");
-  purged = replaceAll(purged, "%3E", ">");
-  purged = replaceAll(purged, "%3C", "<");
-  purged = replaceAll(purged, "%22", "\"");
-  purged = replaceAll(purged, "%27", "'");
-  purged = replaceAll(purged, "%lf", "%");
-  
 
-  return purged;
-}
-
-//replace all implementation
-function replaceAll(string, oldChar, newChar){
-  let replaced = string.replace(oldChar, newChar);
-
-  while(replaced != replaced.replace(oldChar, newChar)){
-    replaced = replaced.replace(oldChar, newChar)
-  }
-
-  return replaced;
-}
 
 app.get('/login', (req, res) =>{
   const{username, password} = req.query;
@@ -162,8 +164,8 @@ app.get('/addQnA',(req, res) =>{
   cleanAnswer = cleanQuery(answer);
   let addKey = Key.getKey(username, password);
   let encryptedAnswer = aes256.encrypt(addKey, cleanAnswer);
-  let addQnAQuery = "Insert INTO userinfo VALUES(?,?,?)"
-  let inserts = [username, question, encryptedAnswer];
+  let addQnAQuery = "Insert INTO userinfo VALUES(?,?,?) ON DUPLICATE KEY UPDATE encryptedAnswer = ?"
+  let inserts = [username, question, encryptedAnswer, encryptedAnswer];
   addQnAQuery = mysql.format(addQnAQuery, inserts);
 
   console.log(addQnAQuery);
