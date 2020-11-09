@@ -28,7 +28,14 @@ var con = mysql.createConnection({
 });
 
 
-//cleans up the query string to get 
+/*
+* Purpose: clean a query by removing query special characters with their actual 
+*   inteneded characters
+*
+* Paramater: string - the query string to be cleaned
+*
+* Return: A string with all the query selections replaced
+*/
 function cleanQuery(string){
   let purged = replaceAll(string, "+", " ");
   purged = replaceAll(purged, "%20", " ");
@@ -44,12 +51,21 @@ function cleanQuery(string){
   return purged;
 }
 
-//replace all implementation
-function replaceAll(string, oldChar, newChar){
-  let replaced = string.replace(oldChar, newChar);
+/*
+* Purpose: replace all instances of oldSubString with newSubString
+*
+* Paramater: string - the query string to be modified
+* Parameter: oldSubString - the substring we are going to replace
+* Parameter: newSubString - the substring we are replacing each 
+*     intance of oldSubString with
+* Return: A string with all the query selections replaced
+*/
+function replaceAll(string, oldSubString, newSubString){
+  let replaced = string.replace(oldSubString, newSubString);  // string that has oldSubString replaced
 
-  while(replaced != replaced.replace(oldChar, newChar)){
-    replaced = replaced.replace(oldChar, newChar)
+  // replace each instance of oldSubString until there are none left
+  while(replaced != replaced.replace(oldSubString, newSubString)){
+    replaced = replaced.replace(oldSubString, newSubString)
   }
 
   return replaced;
@@ -57,8 +73,18 @@ function replaceAll(string, oldChar, newChar){
 
 app.get('/', (req, res) =>{
     res.end("got to /login for login info")
-  })
+})
 
+
+
+/*
+* Purpose: Add a new user into the userlogin table with their username and salted hashed password
+*
+* Paramater: username - the requested username
+* Parameter: password - the requested password
+*  
+* Return: duplicate if the "username" already exists, "inserted" otherwise
+*/
 app.get('/signup', (req, res) =>{
   const{username, password} = req.query;
   let saltGenerator = salt.md.sha256.create();                  // The forge that will generate the salt
@@ -107,7 +133,14 @@ app.get('/signup', (req, res) =>{
 
 
 
-
+/*
+* Purpose: Add a new user into the userlogin table with their username and salted hashed password
+*
+* Paramater: username - the users username
+* Parameter: password - the users password
+*  
+* Return: "unfound" if the username doesn't exist, "incorrect" if the password is incorrect, "granted" otherwise
+*/
 app.get('/login', (req, res) =>{
   const{username, password} = req.query;
   let saltGenerator = salt.md.sha256.create();
@@ -157,7 +190,16 @@ app.get('/login', (req, res) =>{
   
 })
 
-
+/*
+* Purpose: Add a new user's QNA entry into the userlogin table with their username, question, and encryped answer
+*
+* Paramater: username - the users username
+* Parameter: password - the users password
+* Parameter: question - the question the user is answering
+* Parameter: answer - the answer given
+*  
+* Return: "ERROR!" if an error occured, "inserted" otherwise
+*/
 app.get('/addQnA',(req, res) =>{
   const{username, password, question, answer} = req.query;
   cleanQuestion = cleanQuery(question);
@@ -183,6 +225,15 @@ app.get('/addQnA',(req, res) =>{
   })
 })
 
+
+/*
+* Purpose: Retrieves all user QNA's from the database
+*
+* Paramater: username - the users username
+* Parameter: password - the users password
+*  
+* Return: "ERROR!" if an error occured, a JSON of the user's questions and answers otherwise
+*/
 app.get('/getQnA',(req, res) =>{
   const{username, password} = req.query;
   let getKey = Key.getKey(username, password);
